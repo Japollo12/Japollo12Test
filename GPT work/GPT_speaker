@@ -1,0 +1,78 @@
+import speech_recognition as sr
+import pyttsx3
+
+# Initialize the speech recognition and text-to-speech engines
+r = sr.Recognizer()
+engine = pyttsx3.init()
+
+# Define a function to speak text aloud
+def speak(text):
+    engine.say(text)
+    engine.runAndWait()
+
+# Define a function to listen for voice commands
+def listen():
+    with sr.Microphone() as source:
+        r.adjust_for_ambient_noise(source)  # Calibrate the microphone for ambient noise
+        audio = r.listen(source)  # Listen for audio input
+        try:
+            text = r.recognize_google(audio)  # Recognize the audio input using Google Speech Recognition
+            return text
+        except sr.UnknownValueError:
+            speak("Sorry, I didn't understand that. Please try again.")
+        except sr.RequestError as e:
+            speak("Sorry, I couldn't connect to the server. Please try again later.")
+
+# Define a function to set reminders
+def set_reminder():
+    speak("What would you like me to remind you about?")
+    reminder = listen()
+    speak(f"Okay, I'll remind you to {reminder}.")
+
+# Define a function to create a to-do list
+def create_todo():
+    speak("What would you like to add to your to-do list?")
+    todo_item = listen()
+    with open("todo.txt", "a") as f:
+        f.write(f"- {todo_item}\n")
+    speak(f"Okay, I added {todo_item} to your to-do list.")
+
+# Define a function to read the to-do list
+def read_todo():
+    with open("todo.txt", "r") as f:
+        todo_list = f.read()
+    if todo_list:
+        speak("Here is your to-do list:")
+        speak(todo_list)
+    else:
+        speak("Your to-do list is empty.")
+
+# # Define a function to search the web
+# def search_web():
+#     speak("What would you like to search for?")
+#     query = listen()
+#     url = f"https://www.google.com/search?q={query}"
+#     webbrowser.open_new_tab(url)
+#     speak(f"Here are the search results for {query}.")
+
+# Define the main function that listens for commands
+def main():
+    speak("How can I help you?")
+    while True:
+        command = listen().lower()
+        if "set reminder" in command:
+            set_reminder()
+        elif "create to-do" in command:
+            create_todo()
+        elif "read to-do" in command:
+            read_todo()
+        elif "search web" in command:
+            search_web()
+        elif "quit" in command:
+            speak("Goodbye!")
+            break
+        else:
+            speak("Sorry, I didn't understand that. Please try again.")
+
+if __name__ == "__main__":
+    main()
